@@ -1,0 +1,91 @@
+public class main {
+    public static void main(String[] args){
+        
+        lista listita = new lista();
+        
+        System.out.println("\n Lista de numeros desordenados \n");
+        
+        for(int i = 0; i <1_000_000;i++){
+            int num = (int) (Math.random()*10+1);
+            listita.insertar(num);
+            //System.out.println("#"+i+" :"+num);
+        }
+        
+        listita.shell();
+        System.out.println("\n Ordenados: \n");
+        //listita.recorrer();
+    }
+    
+}
+class lista{
+    nodo inicio = null, fin = null;
+    
+    public void insertar(int dato){ //se insertan los número a la lista
+        nodo nuevo = new nodo();
+        nuevo.dato = dato;
+        nuevo.sig = null;
+        nuevo.prev = null;
+        if(inicio == null){
+            inicio = nuevo;
+            fin = nuevo;
+        }else{
+            fin.sig = nuevo;
+            nuevo.prev = fin;
+            fin = fin.sig;
+        }
+    }
+    
+    public void recorrer(){ //función que recorre la lista
+        nodo aux = inicio;
+        while(aux != null){
+            System.out.println(aux.dato);
+            aux = aux.sig;
+        }
+    }
+    
+    public void shell(){ //se llama a la función shell_c con el tamaño de lista
+        int tam = contar_tam_lista();
+        shell_c(tam);
+    }
+    
+    public void shell_c(int tam){ //función que realiza el algoritmo shell
+        if(tam==0){
+            
+        }else{ 
+            int recorrido = tam/2; //se va a dividir el tamaño de la lista en 2
+            nodo aux=inicio,  aux2 = inicio; //se utilizan dos auxiliares
+            for(int i =0;i<50;i++){ //se hace un loop con número impuesto de 50
+                
+                for(int j=0; j<=recorrido;j++){//se hará el recorrido de la mitad de la lista
+                    aux2=aux2.sig;//se avanzará hasta el número
+                }
+                
+                if(aux2==null) break; //si se llega al final de la lista terminará el ciclo
+                if(aux.dato>=aux2.dato){ //si el dato del primer puntero es mayor o igual al del segundo puntero, se hará un intercambio
+                    int pivote = aux.dato;
+                    aux.dato = aux2.dato;
+                    aux2.dato = pivote;
+                }
+                aux=aux.sig;
+                aux2=aux;
+            }
+            
+            shell_c(recorrido); //se hace el recorrido de nuevo con el nuevo tamaño
+        }
+    }
+    
+    public int contar_tam_lista(){ //función que cuenta el tamaño de la lista
+        nodo aux = inicio;
+        int i=0;
+        while(aux!=null){
+            i++;
+            aux=aux.sig;
+        }
+        return i;
+    }
+}
+class nodo{ //la clase nodo
+    int dato;
+    nodo sig;
+    nodo prev;
+}

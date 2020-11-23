@@ -1,0 +1,159 @@
+public class Main {
+    public static void main(String[] args) {
+        var arb = new arbol();
+        
+        arb.insertar(14);
+        arb.insertar(17);
+        arb.insertar(13);
+        arb.insertar(12);
+        arb.insertar(55);
+        arb.insertar(23);
+        arb.insertar(1);
+        
+        arb.recorrer(Recorrido.INORDER);
+        System.out.println("");
+        
+        System.out.println(arb.hasNumber(14));
+        arb.borrar(14);
+        
+        arb.recorrer(Recorrido.POSTORDER);
+        System.out.println("");
+        
+        System.out.println(arb.hasNumber(14));
+        arb.borrar(1);
+        
+        arb.recorrer(Recorrido.PREORDER);
+        System.out.println("");
+    }
+}
+public enum Recorrido {
+    INORDER,PREORDER,POSTORDER
+    
+}
+public class arbol {
+    nodoArbol raiz = null;
+    public void insertar (int dato){
+        nodoArbol nuevo = new nodoArbol();
+        
+        nuevo.dato=dato;
+        nuevo.izq=null;
+        nuevo.der=null;
+        
+        if (raiz == null){
+            raiz=nuevo;
+        }else{
+            nodoArbol aux = raiz;
+            nodoArbol ant = null;
+            while (aux!=null) {
+                ant=aux;
+                if (nuevo.dato > aux.dato) {
+                    aux = aux.der;
+                }else{
+                    aux = aux.izq;
+                }
+            }
+            nuevo.padre = ant;
+            if (nuevo.dato > ant.dato){
+                ant.der = nuevo;
+            }else{
+                ant.izq = nuevo;
+            }
+        }
+    }
+    public void transplant (nodoArbol u, nodoArbol v){
+        if (u.padre == null){
+             raiz = v;
+        }else if (u == u.padre.izq) {
+            u.padre.izq = v;
+        }else{
+            u.padre.der = v;
+        }
+        if (v != null) {
+            v.padre = u.padre;
+        }
+    }
+    public nodoArbol buscar(nodoArbol r, int dato)
+    {
+        if ((r == null) || (dato == r.dato)) {
+            return r;
+        }
+        if (dato < r.dato) {
+            return buscar(r.izq, dato);
+        }
+        else return buscar(r.der, dato);
+    }
+    public void borrar (int dato){
+        delete(buscar(raiz, dato));
+    }
+    public nodoArbol minimo (nodoArbol x){
+        while (x.izq != null){
+            x = x.der;
+        }
+        return x;
+    }
+    public void delete (nodoArbol z){
+        if (z.izq == null) {
+            transplant(z, z.der);
+        }
+        else if (z.der == null) {
+            transplant(z, z.izq);
+        }
+        else{
+            nodoArbol y = minimo(z.der);
+            if (y.padre != z) {
+                transplant (y, y.der);
+                y.der = z.der;
+                y.der.padre = y;
+            }
+            transplant(z,y);
+            y.izq = z.izq;
+            y.izq.padre = y;
+        }
+    }
+    public boolean hasNumber(int dato){
+        return buscarElemento(raiz, dato);
+    }
+    boolean buscarElemento(nodoArbol r, int dato){
+        if (r != null) {
+            if (r.dato == dato) {
+                return true;
+            }else if (dato < r.dato){
+                return buscarElemento(r.izq, dato);
+            }else return buscarElemento(r.der, dato);
+        }else return false;
+    }
+    public void recorrer(Recorrido tipo){
+        switch (tipo){
+            case INORDER -> inorder(raiz);
+            case PREORDER -> preorder(raiz);
+            case POSTORDER -> postorder(raiz);
+        }
+    }
+    void inorder(nodoArbol r){
+        if (r != null){
+            inorder(r.izq);
+            System.out.println(r.dato);
+            inorder(r.der);
+        }
+    }
+    void preorder (nodoArbol r){
+        if (r != null) {
+            System.out.println(r.dato);
+            preorder(r.izq);
+            preorder(r.der);
+        }
+    }
+    void postorder (nodoArbol r){
+        if (r != null) {
+            postorder(r.izq);
+            postorder(r.der);
+            System.out.println(r.dato);
+        }
+    }
+}
+public class nodoArbol {
+    int dato;
+    nodoArbol der;
+    nodoArbol izq;
+    nodoArbol padre;
+}

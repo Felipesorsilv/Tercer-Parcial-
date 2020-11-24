@@ -1,0 +1,371 @@
+public class Main {
+    public static void main(String[] args) {
+        Arbol arb = new Arbol();
+        Random rand = new Random();
+        int dato = 0, azar = 0;        
+        int tam = rand.nextInt(10) + 8;
+        for(int i = 0; i < tam; ++i)
+        {
+            dato = rand.nextInt(100);
+            arb.insertar(dato);
+        }
+        arb.recorrer(Recorrido.INORDER);
+        azar = rand.nextInt(100);
+        System.out.print("\nEliminando " + azar + " del arbol");
+        arb.eliminar(azar);
+        System.out.print("Arbol actualizado: ");
+        arb.recorrer(Recorrido.INORDER); 
+        System.out.print("\nEliminando " + dato + " del arbol");
+        arb.eliminar(dato);
+        System.out.print("Arbol actualizado: ");
+        arb.recorrer(Recorrido.INORDER);
+        System.out.print("\nRecorrido Pre Order: ");
+        arb.recorrer(Recorrido.PREORDER);
+        System.out.print("\nRecorrido In Order: ");
+        arb.recorrer(Recorrido.INORDER);
+        System.out.print("\nRecorrido Post Order: ");
+        arb.recorrer(Recorrido.POSTORDER);
+        System.out.print("\n");
+        arb.buscarNumero(azar);
+    }
+}
+public enum Recorrido {
+    INORDER, PREORDER, POSTORDER
+    
+}
+public class NodoArbol {
+    int dato;
+    NodoArbol p;
+    NodoArbol izq;
+    NodoArbol der;
+    int color;
+    
+}
+public class Arbol {
+    NodoArbol raiz;
+    NodoArbol NIL = NIL();
+    boolean bandera = false;
+    
+    public void insertar(int dato) {
+        NodoArbol nuevo = crearNodo(dato);
+        NodoArbol y = null;
+        NodoArbol x = this.raiz;
+
+        while (x != NIL) {
+            y = x;
+            if (nuevo.dato < x.dato){
+                x = x.izq;
+            }else{
+                x = x.der;
+            }
+        }
+        nuevo.p = y;
+        if (y == null) {
+            raiz = nuevo;
+        }else if(nuevo.dato < y.dato){
+            y.izq = nuevo;
+        }else{
+            y.der = nuevo;
+        }
+
+        if (nuevo.p == null) {
+            nuevo.color = 0;
+            return;
+        }
+
+        if (nuevo.p.p == null) return;
+        arreglarInsertar(nuevo);
+    }
+    public void eliminar(int dato){
+        NodoArbol buscar =  encontrar(raiz, dato);
+        if(buscar != null){
+            bandera = true;
+            NodoArbol aux = new NodoArbol();
+            NodoArbol aux2 = new NodoArbol();
+            aux2 = buscar;
+            int aux2color = aux2.color;
+            if(buscar.izq == NIL)
+            {
+                aux = buscar.der;
+                traspaso(buscar, buscar.der);
+            }else if(buscar.der == NIL){
+                aux = buscar.izq;
+                traspaso(buscar, buscar.izq);
+            }else{
+                aux2 = minimo(buscar.der);
+                aux2color = aux2.color;
+                aux = aux2.der;
+                
+                if(aux2.p == buscar){
+                    aux.p = aux2;
+                }else{
+                    traspaso(aux2, aux2.der);
+                    aux2.der = buscar.der;
+                    aux2.der.p = aux2;
+                }
+                
+                traspaso(buscar, aux2);
+                aux2.izq = buscar.izq;
+                aux2.izq.p = aux2;
+                aux2.color = buscar.color;
+            }
+            System.out.print("\nSe elimino el numero " + dato + "\n");
+            if(aux2color == 0) arreglarEliminar(aux);  
+        }else{
+            System.out.print("\nNo se elimino el numero " + dato + " porque no existe\n");
+        }
+    }
+
+    public void rotacionIzquierda(NodoArbol nuevo){
+        NodoArbol aux = nuevo.der;
+        nuevo.der = aux.izq;
+        
+        if (aux.izq != NIL){
+            aux.izq.p = nuevo;
+        }
+        
+        aux.p = nuevo.p;
+        if(nuevo.p == null){
+            raiz = aux;
+        }else if(nuevo == nuevo.p.izq){
+            nuevo.p.izq = aux;
+        }else{
+            nuevo.p.der = aux;
+        }
+        
+        aux.izq = nuevo;
+        nuevo.p = aux;
+    }
+
+    public void rotacionDerecha(NodoArbol nuevo){
+        NodoArbol aux = nuevo.izq;
+        nuevo.izq = aux.der;
+        
+        if (aux.der != NIL) {
+            aux.der.p = nuevo;
+        }
+        
+        aux.p = nuevo.p;
+        if (nuevo.p == null) {
+            raiz = aux;
+        }else if(nuevo == nuevo.p.der){
+            nuevo.p.der = aux;
+        }else{
+            nuevo.p.izq = aux;
+        }
+        
+        aux.der = nuevo;
+        nuevo.p = aux;
+    }
+    
+    public void traspaso(NodoArbol aux, NodoArbol aux2){
+        if(aux.p == null){
+            raiz = aux2;
+        }else if(aux == aux.p.izq){
+            aux.p.izq = aux2;
+        }else{
+            aux.p.der = aux2;
+        }
+        
+        aux2.p = aux.p;
+    }
+    
+    public void arreglarInsertar(NodoArbol nuevo) {
+        NodoArbol tio;
+        
+        while (nuevo.p.color == 1){
+            if (nuevo.p == nuevo.p.p.der) {
+                tio = nuevo.p.p.izq;
+                
+                if (tio.color == 1) {
+                    tio.color = 0;
+                    nuevo.p.color = 0;
+                    nuevo.p.p.color = 1;
+                    nuevo = nuevo.p.p;
+                }
+                else{
+                    if (nuevo == nuevo.p.izq){
+                        nuevo = nuevo.p;
+                        rotacionDerecha(nuevo);
+                    }
+                    
+                    nuevo.p.color = 0;
+                    nuevo.p.p.color = 1;
+                    rotacionIzquierda(nuevo.p.p);
+                }
+            }
+            
+            else{ 
+                tio = nuevo.p.p.der;
+
+                if (tio.color == 1){
+                    tio.color = 0;
+                    nuevo.p.color = 0;
+                    nuevo.p.p.color = 1;
+                    nuevo = nuevo.p.p;
+                }
+                else{                   
+                    if (nuevo == nuevo.p.der) {
+                        nuevo = nuevo.p;
+                        rotacionIzquierda(nuevo);
+                    }
+                    
+                    nuevo.p.color = 0;
+                    nuevo.p.p.color = 1;
+                    rotacionDerecha(nuevo.p.p);
+                }
+            }
+            if (nuevo == raiz) break;
+        }
+        raiz.color = 0;
+    }
+    
+    public void arreglarEliminar(NodoArbol nuevo){
+        NodoArbol tio;
+        
+        while(nuevo != raiz && nuevo.color == 0){
+            if(nuevo == nuevo.p.izq){
+                tio = nuevo.p.der;
+                
+                if(tio.color == 1){
+                    tio.color = 0;
+                    nuevo.p.color = 1;
+                    rotacionIzquierda(nuevo.p);
+                    tio = nuevo.p.der;
+                }
+                
+                if(tio.izq.color == 0 && tio.der.color == 0){
+                    tio.color = 1;
+                    nuevo = nuevo.p;
+                }else{
+                    if(tio.der.color == 0){
+                        tio.izq.color = 0;
+                        tio.color = 1;
+                        rotacionDerecha(tio);
+                        tio = nuevo.p.der;
+                    }
+                    
+                    tio.color = nuevo.p.color;
+                    nuevo.p.color = 0;
+                    tio.der.color = 0;
+                    rotacionIzquierda(nuevo.p);
+                    nuevo = raiz;
+                }               
+            }
+            
+            else{
+                tio = nuevo.p.izq;
+                
+                if(tio.color == 1){
+                    tio.color = 0;
+                    nuevo.p.color = 1;
+                    rotacionDerecha(nuevo.p);
+                    tio = nuevo.p.izq;
+                }
+                
+                if(tio.der.color == 0 && tio.izq.color == 0){
+                    tio.color = 1;
+                    nuevo = nuevo.p;
+                }else{
+                    if(tio.izq.color == 0){
+                        tio.der.color = 0;
+                        tio.color = 1;
+                        rotacionIzquierda(tio);
+                        tio = nuevo.p.izq;
+                    }
+                    
+                    tio.color = nuevo.p.color;
+                    nuevo.p.color = 0;
+                    tio.izq.color = 0;
+                    rotacionDerecha(nuevo.p);
+                    nuevo = raiz;
+                }
+            }
+        }
+        nuevo.color = 0;
+    }
+    
+    public NodoArbol minimo(NodoArbol aux){
+        while(aux.izq != NIL){
+            aux = aux.izq;
+        }
+        
+        return aux;
+    }
+    
+    public void preOrden(NodoArbol aux){
+        if (aux != NIL) {
+            System.out.print(aux.dato + " ");
+            preOrden(aux.izq);
+            preOrden(aux.der);
+        } 
+    }
+
+    public void inOrden(NodoArbol aux){
+        if (aux != NIL) {
+            inOrden(aux.izq);
+            System.out.print(aux.dato + " ");
+            inOrden(aux.der);
+        } 
+    }
+
+    public void postOrden(NodoArbol aux){
+        if (aux != NIL) {
+            postOrden(aux.izq);
+            postOrden(aux.der);
+            System.out.print(aux.dato + " ");
+        } 
+    }
+
+    public NodoArbol encontrar(NodoArbol aux, int dato){
+        if (aux == null || dato == aux.dato) return aux;
+        if (dato < aux.dato) return encontrar(aux.izq, dato);
+        return encontrar(aux.der, dato);
+    }
+    
+    public void buscarNumero(int dato){
+	NodoArbol aux = encontrar(raiz, dato);
+        if(aux == null){
+            System.out.println("No se encontro el numero " + dato);
+        }else{
+            System.out.println("Se encontro el numero " + aux.dato);
+        }
+    }
+    
+    public NodoArbol crearNodo(int dato){
+        NodoArbol nuevo = new NodoArbol();
+        nuevo.p = null;
+        nuevo.dato = dato;
+        nuevo.izq = NIL;
+        nuevo.der = NIL;
+        nuevo.color = 1;
+        
+        return nuevo;
+    }
+    
+    public NodoArbol NIL(){
+        NIL = new NodoArbol();
+        NIL.color = 0;
+        NIL.izq = null;
+        NIL.der = null;
+        raiz = NIL;
+        
+        return NIL;
+    }
+     public void recorrer(Recorrido tipo){
+        switch(tipo){
+            case INORDER -> {
+                inOrden(this.raiz);
+                System.out.print("\n");
+            }
+            case POSTORDER -> {
+                postOrden(this.raiz);
+                System.out.print("\n");
+            }
+            case PREORDER -> {
+                preOrden(this.raiz);
+                System.out.print("\n");
+            }
+        }
+     }
+}
